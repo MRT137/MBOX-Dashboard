@@ -1,0 +1,36 @@
+   name: Run Tests
+
+   on:
+     push:
+       branches:
+         - main  # Change this to your default branch if different
+     pull_request:
+       branches:
+         - main
+
+   jobs:
+     test:
+       runs-on: ubuntu-latest
+
+       steps:
+         - name: Checkout code
+           uses: actions/checkout@v2
+
+         - name: Set up Node.js
+           uses: actions/setup-node@v2
+           with:
+             node-version: '14'  # Adjust this to the Node version you need
+
+         - name: Install clasp
+           run: npm install -g clasp  # Install clasp if you use it to manage Google Apps Scripts
+
+         - name: Authenticate to Google
+           env:
+             GOOGLE_API_CLIENT_ID: ${{ secrets.GOOGLE_API_CLIENT_ID }}
+             GOOGLE_API_CLIENT_SECRET: ${{ secrets.GOOGLE_API_CLIENT_SECRET }}
+             GOOGLE_API_REFRESH_TOKEN: ${{ secrets.GOOGLE_API_REFRESH_TOKEN }}
+           run: |
+             clasp login --creds <(echo '{"client_id":"'"$GOOGLE_API_CLIENT_ID"'","client_secret":"'"$GOOGLE_API_CLIENT_SECRET"'","refresh_token":"'"$GOOGLE_API_REFRESH_TOKEN"'"}')
+         
+         - name: Run Tests
+           run: clasp run runTests  # Adjust this command based on your test function name
